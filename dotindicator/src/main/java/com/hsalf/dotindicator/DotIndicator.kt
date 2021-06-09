@@ -26,7 +26,7 @@ class DotIndicator : View {
     private var previousPage = -1
 
     private var dotSize = 30 // This is a px value
-    private var lineWidth = 4f
+    private var lineWidth = dotSize / 8f
 
     private val startAngle: Float
         get() = floatEvaluator.evaluate(progressAnimator.animatedFraction, START_ANGLE, END_ANGLE)
@@ -34,23 +34,13 @@ class DotIndicator : View {
     private val sweepAngle: Float
         get() = (SWEEP_ANGLE - startAngle + START_ANGLE)
 
-    private var dotReadColor = Color.parseColor("#6177E5")
-    private var dotPathColor = Color.parseColor("#4D6177E5")
+    private var dotBorderColor = Color.parseColor("#6177E5")
     private var dotUnReadColor = Color.parseColor("#22262F")
     private var dotReadInnerArcColor = Color.parseColor("#B36177E5")
 
     private val referenceRect by lazy { RectF() }
     private val argbEvaluator by lazy { ArgbEvaluator() }
     private val floatEvaluator by lazy { FloatEvaluator() }
-
-    private val arcReadPaint by lazy {
-        Paint().also {
-            it.isAntiAlias = true
-            it.color = dotReadColor
-            it.strokeWidth = lineWidth
-            it.style = Paint.Style.STROKE
-        }
-    }
 
     private val arcReadInnerPaint by lazy {
         Paint().also {
@@ -72,7 +62,7 @@ class DotIndicator : View {
     private val pathFillPaint by lazy {
         Paint().also {
             it.isAntiAlias = true
-            it.color = dotReadColor
+            it.color = dotBorderColor
             it.strokeWidth = lineWidth
             it.style = Paint.Style.STROKE
         }
@@ -152,7 +142,7 @@ class DotIndicator : View {
             START_ANGLE,
             SWEEP_ANGLE,
             false,
-            preparePaint(pathFillPaint, forward, dotPathColor)
+            preparePaint(pathFillPaint, forward, dotBorderColor)
         )
 
         var start = startAngle
@@ -169,13 +159,6 @@ class DotIndicator : View {
             sweep,
             true,
             preparePaint(arcReadInnerPaint, forward, dotReadInnerArcColor)
-        )
-        canvas.drawArc(
-            referenceRect,
-            start,
-            sweep,
-            false,
-            preparePaint(arcReadPaint, forward, dotReadColor)
         )
     }
 
