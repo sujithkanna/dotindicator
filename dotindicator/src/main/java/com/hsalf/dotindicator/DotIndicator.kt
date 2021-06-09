@@ -13,12 +13,14 @@ import android.view.View
 import android.view.animation.LinearInterpolator
 import androidx.core.animation.doOnEnd
 
-class DotIndicator @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    style: Int = 0
-) :
-    View(context, attrs, style) {
+class DotIndicator : View {
+    constructor(context: Context) : super(context)
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    )
 
     private var currentPage = 0
     private var previousPage = -1
@@ -27,10 +29,10 @@ class DotIndicator @JvmOverloads constructor(
     private var lineWidth = 4f
 
     private val startAngle: Float
-        get() = floatEvaluator.evaluate(progressAnimator.animatedFraction, START_ANGLE, 270f)
+        get() = floatEvaluator.evaluate(progressAnimator.animatedFraction, START_ANGLE, END_ANGLE)
 
     private val sweepAngle: Float
-        get() = (SWEEP_ANGLE - startAngle + START_ANGLE).toDegree()
+        get() = (SWEEP_ANGLE - startAngle + START_ANGLE)
 
     private var dotReadColor = Color.parseColor("#6177E5")
     private var dotPathColor = Color.parseColor("#4D6177E5")
@@ -38,9 +40,8 @@ class DotIndicator @JvmOverloads constructor(
     private var dotReadInnerArcColor = Color.parseColor("#B36177E5")
 
     private val referenceRect by lazy { RectF() }
-
-    private val argbEvaluator = ArgbEvaluator()
-    private val floatEvaluator = FloatEvaluator()
+    private val argbEvaluator by lazy { ArgbEvaluator() }
+    private val floatEvaluator by lazy { FloatEvaluator() }
 
     private val arcReadPaint by lazy {
         Paint().also {
@@ -71,7 +72,7 @@ class DotIndicator @JvmOverloads constructor(
     private val pathFillPaint by lazy {
         Paint().also {
             it.isAntiAlias = true
-            it.color = dotPathColor
+            it.color = dotReadColor
             it.strokeWidth = lineWidth
             it.style = Paint.Style.STROKE
         }
@@ -116,7 +117,7 @@ class DotIndicator @JvmOverloads constructor(
         progressAnimator.start()
     }
 
-    fun next() {
+    private fun next() {
         previousPage = currentPage
         currentPage = currentPage.inc() % INDICATOR_COUNT
         animateDot()
@@ -134,14 +135,14 @@ class DotIndicator @JvmOverloads constructor(
         }
     }
 
-    private fun drawProgress(canvas: Canvas, index: Int, start: Int) {
+    private fun drawProgress(canvas: Canvas, index: Int, left: Int) {
         if (index != currentPage && index != previousPage) return
 
         val padding = lineWidth / 2f
 
         referenceRect.set(
-            start + padding, padding,
-            start + dotSize - padding, dotSize - padding
+            left + padding, padding,
+            left + dotSize - padding, dotSize - padding
         )
 
         val forward = currentPage == index
@@ -154,19 +155,25 @@ class DotIndicator @JvmOverloads constructor(
             preparePaint(pathFillPaint, forward, dotPathColor)
         )
 
-        if (forward && transitionAnimator.isRunning) return
+        var start = startAngle
+        var sweep = sweepAngle
+
+        if (forward && transitionAnimator.isRunning) {
+            start = START_ANGLE
+            sweep = SWEEP_ANGLE
+        }
 
         canvas.drawArc(
             referenceRect,
-            startAngle,
-            sweepAngle,
+            start,
+            sweep,
             true,
             preparePaint(arcReadInnerPaint, forward, dotReadInnerArcColor)
         )
         canvas.drawArc(
             referenceRect,
-            startAngle,
-            sweepAngle,
+            start,
+            sweep,
             false,
             preparePaint(arcReadPaint, forward, dotReadColor)
         )
@@ -183,11 +190,12 @@ class DotIndicator @JvmOverloads constructor(
     }
 
     companion object {
+        const val END_ANGLE = 270f
         const val START_ANGLE = -90f
         const val SWEEP_ANGLE = 360f
         const val INDICATOR_COUNT = 3
         const val PROGRESS_DURATION = 5000L
-        const val TRANSITION_DURATION = 500L
+        const val TRANSITION_DURATION = 300L
     }
 }
 
