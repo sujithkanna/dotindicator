@@ -8,15 +8,15 @@
     tools:context=".MainActivity">
 
     <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/activity_main_pager"
+        android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginBottom="50dp"
-        app:layout_constraintBottom_toTopOf="@+id/activity_main_start_dot_indicator"
+        app:layout_constraintBottom_toTopOf="@+id/dot_indicator"
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.hsalf.dotindicator.DotIndicator
-        android:id="@+id/activity_main_start_dot_indicator"
+        android:id="@+id/dot_indicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="50dp"

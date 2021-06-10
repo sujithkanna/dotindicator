@@ -22,7 +22,13 @@ class DotIndicator : View {
         defStyleAttr
     )
 
-    private var currentPage = 0
+    var currentPage = 0
+        set(value) {
+            field = value
+            cancelAllAnimations()
+            animateDot()
+        }
+
     private var previousPage = -1
 
     private var dotSize = 30 // This is a px value
@@ -41,6 +47,9 @@ class DotIndicator : View {
     private val referenceRect by lazy { RectF() }
     private val argbEvaluator by lazy { ArgbEvaluator() }
     private val floatEvaluator by lazy { FloatEvaluator() }
+
+    private var allowTimeoutDispatch = true
+    var pageTimeoutListener: (() -> Unit)? = null
 
     private val arcReadInnerPaint by lazy {
         Paint().also {
@@ -70,7 +79,7 @@ class DotIndicator : View {
 
     private val progressAnimator by lazy {
         ValueAnimator().also {
-            it.doOnEnd { next() }
+            it.doOnEnd { dispatchTimeoutCallback() }
             it.duration = PROGRESS_DURATION
             it.setFloatValues(0f, 1f)
             it.addUpdateListener { invalidate() }
@@ -93,24 +102,31 @@ class DotIndicator : View {
         setMeasuredDimension(dotSize * 5, dotSize)
     }
 
-    fun start() {
-        animateDot()
-    }
-
     private fun animateDot() {
+        allowTimeoutDispatch = false
         if (transitionAnimator.isRunning) transitionAnimator.cancel()
+        allowTimeoutDispatch = true
         transitionAnimator.start()
     }
 
     private fun animateProgress() {
+        allowTimeoutDispatch = false
         if (progressAnimator.isRunning) progressAnimator.cancel()
+        allowTimeoutDispatch = true
         progressAnimator.start()
     }
 
-    private fun next() {
-        previousPage = currentPage
-        currentPage = currentPage.inc() % INDICATOR_COUNT
-        animateDot()
+    private fun cancelAllAnimations() {
+        allowTimeoutDispatch = false
+        if (progressAnimator.isRunning) progressAnimator.cancel()
+        if (transitionAnimator.isRunning) transitionAnimator.cancel()
+        allowTimeoutDispatch = true
+    }
+
+    private fun dispatchTimeoutCallback() {
+        if (allowTimeoutDispatch) {
+            pageTimeoutListener?.invoke()
+        }
     }
 
     override fun draw(canvas: Canvas) {
