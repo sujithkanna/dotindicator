@@ -26,6 +26,7 @@ class DotIndicator : View {
     )
 
     private var currentPage = 0
+    private var animatingDot = -1
     private var viewPager: ViewPager2? = null
     private var currentPageVisibleFraction = 1f
     private var pageScrollState = SCROLL_STATE_IDLE
@@ -117,6 +118,7 @@ class DotIndicator : View {
     private fun startTimer() {
         cancelReverseTimer()
         cancelTimer()
+        animatingDot = currentPage
         progressAnimator.start()
     }
 
@@ -125,6 +127,7 @@ class DotIndicator : View {
         val startAngle = this.startAngle
         cancelTimer()
         cancelReverseTimer()
+        animatingDot = currentPage
         progressReverseAnimator.setFloatValues(startAngle, START_ANGLE)
         progressReverseAnimator.start()
         allowTimeoutCallback = true
@@ -191,8 +194,15 @@ class DotIndicator : View {
                 preparePaint(pathFillPaint, first, dotBorderColor)
             )
 
+            var start = startAngle
+            var sweep = sweepAngle
+            if (animatingDot != index) {
+                start = START_ANGLE
+                sweep = SWEEP_ANGLE
+            }
+
             canvas.drawArc(
-                referenceRect, startAngle, sweepAngle, true,
+                referenceRect, start, sweep, true,
                 preparePaint(arcReadInnerPaint, first, dotReadInnerArcColor)
             )
         }
