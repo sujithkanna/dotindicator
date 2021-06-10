@@ -85,6 +85,7 @@ class DotIndicator : View {
     private val progressAnimator by lazy {
         ValueAnimator().also {
             it.doOnEnd { _ ->
+                animatingDot = -1
                 it.duration = PROGRESS_DURATION
                 if (allowTimeoutCallback) viewPager?.next()
             }
@@ -97,6 +98,9 @@ class DotIndicator : View {
 
     private val progressReverseAnimator by lazy {
         ValueAnimator().also {
+            it.doOnEnd {
+                animatingDot = -1
+            }
             it.duration = PROGRESS_REVERSE_DURATION
             it.setFloatValues(0f, 1f)
             it.addUpdateListener { invalidate() }
@@ -223,7 +227,7 @@ class DotIndicator : View {
         const val START_ANGLE = -90f
         const val SWEEP_ANGLE = 360f
         const val INDICATOR_COUNT = 3
-        const val PROGRESS_DURATION = 5000L
+        const val PROGRESS_DURATION = 4000L
         const val PROGRESS_REVERSE_DURATION = 200L
     }
 }
