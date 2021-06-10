@@ -12,6 +12,9 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.animation.LinearInterpolator
 import androidx.core.animation.doOnEnd
+import androidx.viewpager2.widget.ViewPager2
+import androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_DRAGGING
+import androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_IDLE
 
 class DotIndicator : View {
     constructor(context: Context) : super(context)
@@ -22,14 +25,10 @@ class DotIndicator : View {
         defStyleAttr
     )
 
-    var currentPage = 0
-        set(value) {
-            field = value
-            cancelAllAnimations()
-            animateDot()
-        }
-
-    private var previousPage = -1
+    private var currentPage = 0
+    private lateinit var viewPager: ViewPager2
+    private var currentPageVisibleFraction = 1f
+    private var pageScrollState = SCROLL_STATE_IDLE
 
     private var dotSize = 30 // This is a px value
     private var lineWidth = dotSize / 8f
@@ -48,8 +47,7 @@ class DotIndicator : View {
     private val argbEvaluator by lazy { ArgbEvaluator() }
     private val floatEvaluator by lazy { FloatEvaluator() }
 
-    private var allowTimeoutDispatch = true
-    var pageTimeoutListener: (() -> Unit)? = null
+    private var allowTimeoutCallback = true
 
     private val arcReadInnerPaint by lazy {
         Paint().also {
@@ -79,7 +77,9 @@ class DotIndicator : View {
 
     private val progressAnimator by lazy {
         ValueAnimator().also {
-            it.doOnEnd { dispatchTimeoutCallback() }
+            it.doOnEnd {
+                if (allowTimeoutCallback) viewPager.next()
+            }
             it.duration = PROGRESS_DURATION
             it.setFloatValues(0f, 1f)
             it.addUpdateListener { invalidate() }
@@ -87,46 +87,21 @@ class DotIndicator : View {
         }
     }
 
-    private val transitionAnimator by lazy {
-        ValueAnimator().also {
-            it.doOnEnd { animateProgress() }
-            it.setFloatValues(0f, 1f)
-            it.duration = TRANSITION_DURATION
-            it.addUpdateListener { invalidate() }
-            it.interpolator = LinearInterpolator()
-        }
-    }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        setMeasuredDimension(dotSize * 5, dotSize)
+        setMeasuredDimension(((INDICATOR_COUNT * 2) - 1) * dotSize, dotSize)
     }
 
-    private fun animateDot() {
-        allowTimeoutDispatch = false
-        if (transitionAnimator.isRunning) transitionAnimator.cancel()
-        allowTimeoutDispatch = true
-        transitionAnimator.start()
-    }
-
-    private fun animateProgress() {
-        allowTimeoutDispatch = false
-        if (progressAnimator.isRunning) progressAnimator.cancel()
-        allowTimeoutDispatch = true
+    private fun startTimer() {
+        cancelTimer()
         progressAnimator.start()
     }
 
-    private fun cancelAllAnimations() {
-        allowTimeoutDispatch = false
+    private fun cancelTimer() {
+        allowTimeoutCallback = false
         if (progressAnimator.isRunning) progressAnimator.cancel()
-        if (transitionAnimator.isRunning) transitionAnimator.cancel()
-        allowTimeoutDispatch = true
-    }
-
-    private fun dispatchTimeoutCallback() {
-        if (allowTimeoutDispatch) {
-            pageTimeoutListener?.invoke()
-        }
+        allowTimeoutCallback = true
     }
 
     override fun draw(canvas: Canvas) {
@@ -141,48 +116,70 @@ class DotIndicator : View {
         }
     }
 
-    private fun drawProgress(canvas: Canvas, index: Int, left: Int) {
-        if (index != currentPage && index != previousPage) return
+    fun bindViewPager(viewPager: ViewPager2) {
+        this.viewPager = viewPager
+        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageScrollStateChanged(state: Int) {
+                super.onPageScrollStateChanged(state)
+                pageScrollState = state
+                when (state) {
+                    SCROLL_STATE_DRAGGING -> cancelTimer()
+                    SCROLL_STATE_IDLE -> startTimer()
+                }
+            }
 
-        val padding = lineWidth / 2f
-
-        referenceRect.set(
-            left + padding, padding,
-            left + dotSize - padding, dotSize - padding
-        )
-
-        val forward = currentPage == index
-
-        canvas.drawArc(
-            referenceRect,
-            START_ANGLE,
-            SWEEP_ANGLE,
-            false,
-            preparePaint(pathFillPaint, forward, dotBorderColor)
-        )
-
-        var start = startAngle
-        var sweep = sweepAngle
-
-        if (forward && transitionAnimator.isRunning) {
-            start = START_ANGLE
-            sweep = SWEEP_ANGLE
-        }
-
-        canvas.drawArc(
-            referenceRect,
-            start,
-            sweep,
-            true,
-            preparePaint(arcReadInnerPaint, forward, dotReadInnerArcColor)
-        )
+            override fun onPageScrolled(position: Int, offset: Float, pixels: Int) {
+                super.onPageScrolled(position, offset, pixels)
+                currentPage = position
+                currentPageVisibleFraction = offset
+                invalidate()
+            }
+        })
+        requestLayout()
+        startTimer()
     }
 
-    private fun preparePaint(paint: Paint, forward: Boolean, color: Int): Paint {
-        val animatedColor = if (forward) {
-            argbEvaluator.evaluate(transitionAnimator.animatedFraction, Color.TRANSPARENT, color)
+    private fun drawProgress(canvas: Canvas, index: Int, left: Int) {
+        if (index == currentPage || index == currentPage + 1) {
+            val padding = lineWidth / 2f
+
+            referenceRect.set(
+                left + padding, padding,
+                left + dotSize - padding, dotSize - padding
+            )
+
+            val first = currentPage == index
+
+            canvas.drawArc(
+                referenceRect,
+                START_ANGLE,
+                SWEEP_ANGLE,
+                false,
+                preparePaint(pathFillPaint, first, dotBorderColor)
+            )
+
+            var start = startAngle
+            var sweep = sweepAngle
+            if (pageScrollState != SCROLL_STATE_IDLE) {
+                start = START_ANGLE
+                sweep = SWEEP_ANGLE
+            }
+
+            canvas.drawArc(
+                referenceRect,
+                start,
+                sweep,
+                true,
+                preparePaint(arcReadInnerPaint, first, dotReadInnerArcColor)
+            )
+        }
+    }
+
+    private fun preparePaint(paint: Paint, first: Boolean, color: Int): Paint {
+        val animatedColor = if (first) {
+            argbEvaluator.evaluate(currentPageVisibleFraction, color, Color.TRANSPARENT)
         } else {
-            argbEvaluator.evaluate(transitionAnimator.animatedFraction, color, Color.TRANSPARENT)
+            argbEvaluator.evaluate(currentPageVisibleFraction, Color.TRANSPARENT, color)
         }
         paint.color = animatedColor as Int
         return paint
@@ -194,7 +191,6 @@ class DotIndicator : View {
         const val SWEEP_ANGLE = 360f
         const val INDICATOR_COUNT = 3
         const val PROGRESS_DURATION = 5000L
-        const val TRANSITION_DURATION = 300L
     }
 }
 
@@ -204,4 +200,8 @@ fun Float.toDegree(): Float {
 
 fun Int.toDegree(): Float {
     return this.toFloat().toDegree()
+}
+
+fun ViewPager2.next() {
+    this.currentItem = this.currentItem.inc() % this.adapter!!.itemCount
 }
