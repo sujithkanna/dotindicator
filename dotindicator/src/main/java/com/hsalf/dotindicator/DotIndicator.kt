@@ -34,7 +34,13 @@ class DotIndicator : View {
     private var lineWidth = dotSize / 8f
 
     private val startAngle: Float
-        get() = floatEvaluator.evaluate(progressAnimator.animatedFraction, START_ANGLE, END_ANGLE)
+        get() {
+            return if (progressAnimator.isRunning) {
+                floatEvaluator.evaluate(progressAnimator.animatedFraction, START_ANGLE, END_ANGLE)
+            } else {
+                progressReverseAnimator.animatedValue as Float
+            }
+        }
 
     private val sweepAngle: Float
         get() = (SWEEP_ANGLE - startAngle + START_ANGLE)
@@ -77,10 +83,20 @@ class DotIndicator : View {
 
     private val progressAnimator by lazy {
         ValueAnimator().also {
-            it.doOnEnd {
+            it.doOnEnd { _ ->
+                it.duration = PROGRESS_DURATION
                 if (allowTimeoutCallback) viewPager?.next()
             }
             it.duration = PROGRESS_DURATION
+            it.setFloatValues(0f, 1f)
+            it.addUpdateListener { invalidate() }
+            it.interpolator = LinearInterpolator()
+        }
+    }
+
+    private val progressReverseAnimator by lazy {
+        ValueAnimator().also {
+            it.duration = PROGRESS_REVERSE_DURATION
             it.setFloatValues(0f, 1f)
             it.addUpdateListener { invalidate() }
             it.interpolator = LinearInterpolator()
@@ -99,14 +115,29 @@ class DotIndicator : View {
     }
 
     private fun startTimer() {
+        cancelReverseTimer()
         cancelTimer()
         progressAnimator.start()
+    }
+
+    private fun reverseTimer() {
+        allowTimeoutCallback = false
+        val startAngle = this.startAngle
+        cancelTimer()
+        cancelReverseTimer()
+        progressReverseAnimator.setFloatValues(startAngle, START_ANGLE)
+        progressReverseAnimator.start()
+        allowTimeoutCallback = true
     }
 
     private fun cancelTimer() {
         allowTimeoutCallback = false
         if (progressAnimator.isRunning) progressAnimator.cancel()
         allowTimeoutCallback = true
+    }
+
+    private fun cancelReverseTimer() {
+        if (progressReverseAnimator.isRunning) progressReverseAnimator.cancel()
     }
 
     override fun draw(canvas: Canvas) {
@@ -128,7 +159,7 @@ class DotIndicator : View {
                 super.onPageScrollStateChanged(state)
                 pageScrollState = state
                 when (state) {
-                    SCROLL_STATE_DRAGGING -> cancelTimer()
+                    SCROLL_STATE_DRAGGING -> reverseTimer()
                     SCROLL_STATE_IDLE -> startTimer()
                 }
             }
@@ -146,8 +177,8 @@ class DotIndicator : View {
 
     private fun drawProgress(canvas: Canvas, index: Int, left: Int) {
         if (index == currentPage || index == currentPage + 1) {
-            val padding = lineWidth / 2f
 
+            val padding = lineWidth / 2f
             referenceRect.set(
                 left + padding, padding,
                 left + dotSize - padding, dotSize - padding
@@ -156,25 +187,12 @@ class DotIndicator : View {
             val first = currentPage == index
 
             canvas.drawArc(
-                referenceRect,
-                START_ANGLE,
-                SWEEP_ANGLE,
-                false,
+                referenceRect, START_ANGLE, SWEEP_ANGLE, false,
                 preparePaint(pathFillPaint, first, dotBorderColor)
             )
 
-            var start = startAngle
-            var sweep = sweepAngle
-            if (pageScrollState != SCROLL_STATE_IDLE) {
-                start = START_ANGLE
-                sweep = SWEEP_ANGLE
-            }
-
             canvas.drawArc(
-                referenceRect,
-                start,
-                sweep,
-                true,
+                referenceRect, startAngle, sweepAngle, true,
                 preparePaint(arcReadInnerPaint, first, dotReadInnerArcColor)
             )
         }
@@ -196,6 +214,7 @@ class DotIndicator : View {
         const val SWEEP_ANGLE = 360f
         const val INDICATOR_COUNT = 3
         const val PROGRESS_DURATION = 5000L
+        const val PROGRESS_REVERSE_DURATION = 200L
     }
 }
 
