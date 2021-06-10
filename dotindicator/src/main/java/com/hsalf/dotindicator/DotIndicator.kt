@@ -26,7 +26,7 @@ class DotIndicator : View {
     )
 
     private var currentPage = 0
-    private lateinit var viewPager: ViewPager2
+    private var viewPager: ViewPager2? = null
     private var currentPageVisibleFraction = 1f
     private var pageScrollState = SCROLL_STATE_IDLE
 
@@ -78,13 +78,18 @@ class DotIndicator : View {
     private val progressAnimator by lazy {
         ValueAnimator().also {
             it.doOnEnd {
-                if (allowTimeoutCallback) viewPager.next()
+                if (allowTimeoutCallback) viewPager?.next()
             }
             it.duration = PROGRESS_DURATION
             it.setFloatValues(0f, 1f)
             it.addUpdateListener { invalidate() }
             it.interpolator = LinearInterpolator()
         }
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        viewPager = null
     }
 
 
