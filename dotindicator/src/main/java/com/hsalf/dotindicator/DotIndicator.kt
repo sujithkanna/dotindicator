@@ -33,7 +33,15 @@ class DotIndicator : View {
     private var focusedPageVisibilityFraction = 1f
     private var pageScrollState = SCROLL_STATE_IDLE
 
-    private var dotSize = 30f // This is a px value
+    private val dotSize: Float
+        get() = context.resources.displayMetrics.density * 12
+
+    private val totalDotSpace: Float
+        get() = ((dotCount * 2) - 1) * dotSize
+
+    private val verticalPadding: Float
+        get() = context.resources.displayMetrics.density * 2
+
     private var lineWidth = dotSize / 8f
 
     private val startAngle: Float
@@ -44,6 +52,9 @@ class DotIndicator : View {
                 progressReverseAnimator.animatedValue as Float
             }
         }
+
+    private val dotCount: Int
+        get() = viewPager?.adapter?.itemCount ?: INITIAL_COUNT
 
     private val sweepAngle: Float
         get() = (SWEEP_ANGLE - startAngle + START_ANGLE)
@@ -114,9 +125,7 @@ class DotIndicator : View {
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        dotSize.toInt().let { dot ->
-            setMeasuredDimension(((INDICATOR_COUNT * 2) - 1) * dot, dot)
-        }
+        setMeasuredDimension(((verticalPadding * 2) + totalDotSpace).toInt(), dotSize.toInt())
     }
 
     private fun startTimer() {
@@ -174,8 +183,8 @@ class DotIndicator : View {
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
         val radius = dotSize / 2f
-        for (i in 0 until INDICATOR_COUNT) {
-            val start = dotSize * 2 * i
+        for (i in 0 until dotCount) {
+            val start = (dotSize * 2 * i) + verticalPadding
             val x = radius + start
             val y = radius
             canvas.drawCircle(x, y, radius, dotPaint)
@@ -231,7 +240,7 @@ class DotIndicator : View {
         const val END_ANGLE = 270f
         const val START_ANGLE = -90f
         const val SWEEP_ANGLE = 360f
-        const val INDICATOR_COUNT = 3
+        const val INITIAL_COUNT = 1
         const val PROGRESS_DURATION = 4000L
         const val PROGRESS_REVERSE_DURATION = 200L
     }
