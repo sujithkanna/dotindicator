@@ -30,10 +30,10 @@ class DotIndicator : View {
     private var animatingDot = -1
     private var manualDrag = false
     private var viewPager: ViewPager2? = null
-    private var currentPageVisibleFraction = 1f
+    private var focusedPageVisibilityFraction = 1f
     private var pageScrollState = SCROLL_STATE_IDLE
 
-    private var dotSize = 30 // This is a px value
+    private var dotSize = 30f // This is a px value
     private var lineWidth = dotSize / 8f
 
     private val startAngle: Float
@@ -114,12 +114,14 @@ class DotIndicator : View {
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        setMeasuredDimension(((INDICATOR_COUNT * 2) - 1) * dotSize, dotSize)
+        dotSize.toInt().let { dot ->
+            setMeasuredDimension(((INDICATOR_COUNT * 2) - 1) * dot, dot)
+        }
     }
 
     private fun startTimer() {
-        cancelReverseTimer()
         cancelTimer()
+        cancelReverseTimer()
         animatingDot = focusedPage
         progressAnimator.start()
     }
@@ -130,19 +132,43 @@ class DotIndicator : View {
         cancelTimer()
         cancelReverseTimer()
         animatingDot = focusedPage
-        progressReverseAnimator.setFloatValues(startAngle, START_ANGLE)
-        progressReverseAnimator.start()
+        progressReverseAnimator.let {
+            it.setFloatValues(startAngle, START_ANGLE)
+            it.start()
+        }
         allowTimeoutCallback = true
     }
 
-    private fun cancelTimer() {
+    private fun cancelTimer() = progressAnimator.let {
         allowTimeoutCallback = false
-        if (progressAnimator.isRunning) progressAnimator.cancel()
+        if (it.isRunning) it.cancel()
         allowTimeoutCallback = true
     }
 
-    private fun cancelReverseTimer() {
-        if (progressReverseAnimator.isRunning) progressReverseAnimator.cancel()
+    private fun cancelReverseTimer() = progressReverseAnimator.let { if (it.isRunning) it.cancel() }
+
+    fun bindViewPager(viewPager: ViewPager2) {
+        this.viewPager = viewPager
+        this.viewPager!!.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageScrollStateChanged(state: Int) {
+                pageScrollState = state
+                if (SCROLL_STATE_DRAGGING == state) {
+                    manualDrag = true
+                    reverseTimer()
+                } else if (SCROLL_STATE_IDLE == state) {
+                    manualDrag = false
+                    startTimer()
+                }
+            }
+
+            override fun onPageScrolled(position: Int, offset: Float, pixels: Int) {
+                focusedPage = position
+                focusedPageVisibilityFraction = offset
+                invalidate()
+            }
+        })
+
+        startTimer()
     }
 
     override fun draw(canvas: Canvas) {
@@ -157,43 +183,11 @@ class DotIndicator : View {
         }
     }
 
-    fun bindViewPager(viewPager: ViewPager2) {
-        this.viewPager = viewPager
-        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageScrollStateChanged(state: Int) {
-                super.onPageScrollStateChanged(state)
-                pageScrollState = state
-                when (state) {
-                    SCROLL_STATE_DRAGGING -> {
-                        manualDrag = true
-                        reverseTimer()
-                    }
-                    SCROLL_STATE_IDLE -> {
-                        manualDrag = false
-                        startTimer()
-                    }
-                }
-            }
-
-            override fun onPageScrolled(position: Int, offset: Float, pixels: Int) {
-                super.onPageScrolled(position, offset, pixels)
-                focusedPage = position
-                currentPageVisibleFraction = offset
-                invalidate()
-            }
-        })
-        requestLayout()
-        startTimer()
-    }
-
-    private fun drawProgress(canvas: Canvas, index: Int, left: Int) {
+    private fun drawProgress(canvas: Canvas, index: Int, left: Float) {
         if (index == focusedPage || index == focusedPage + 1) {
 
-            val padding = lineWidth / 2f
-            referenceRect.set(
-                left + padding, padding,
-                left + dotSize - padding, dotSize - padding
-            )
+            referenceRect.set(left, 0f, left + dotSize, dotSize)
+            referenceRect.addPadding(lineWidth / 2f)
 
             val focused = focusedPage == index
 
@@ -225,9 +219,9 @@ class DotIndicator : View {
 
     private fun preparePaint(paint: Paint, focused: Boolean, color: Int): Paint {
         val animatedColor = if (focused) {
-            argbEvaluator.evaluate(currentPageVisibleFraction, color, Color.TRANSPARENT)
+            argbEvaluator.evaluate(focusedPageVisibilityFraction, color, Color.TRANSPARENT)
         } else {
-            argbEvaluator.evaluate(currentPageVisibleFraction, Color.TRANSPARENT, color)
+            argbEvaluator.evaluate(focusedPageVisibilityFraction, Color.TRANSPARENT, color)
         }
         paint.color = animatedColor as Int
         return paint
@@ -253,4 +247,8 @@ fun Int.toDegree(): Float {
 
 fun ViewPager2.next() {
     this.currentItem = this.currentItem.inc() % this.adapter!!.itemCount
+}
+
+fun RectF.addPadding(padding: Float) {
+    set(left + padding, top + padding, right - padding, bottom - padding)
 }
