@@ -72,6 +72,25 @@ class DotIndicator : View {
 
     private var allowTimeoutCallback = true
 
+    private val pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
+        override fun onPageScrollStateChanged(state: Int) {
+            pageScrollState = state
+            if (SCROLL_STATE_DRAGGING == state) {
+                manualDrag = true
+                reverseTimer()
+            } else if (SCROLL_STATE_IDLE == state) {
+                manualDrag = false
+                startTimer()
+            }
+        }
+
+        override fun onPageScrolled(position: Int, offset: Float, pixels: Int) {
+            focusedPage = position
+            focusedPageVisibilityFraction = offset
+            invalidate()
+        }
+    }
+
     private val arcReadInnerPaint by lazy {
         Paint().also {
             it.isAntiAlias = true
@@ -117,11 +136,6 @@ class DotIndicator : View {
         }
     }
 
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        viewPager = null
-    }
-
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -158,26 +172,14 @@ class DotIndicator : View {
 
     fun bindViewPager(viewPager: ViewPager2) {
         this.viewPager = viewPager
-        this.viewPager!!.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageScrollStateChanged(state: Int) {
-                pageScrollState = state
-                if (SCROLL_STATE_DRAGGING == state) {
-                    manualDrag = true
-                    reverseTimer()
-                } else if (SCROLL_STATE_IDLE == state) {
-                    manualDrag = false
-                    startTimer()
-                }
-            }
-
-            override fun onPageScrolled(position: Int, offset: Float, pixels: Int) {
-                focusedPage = position
-                focusedPageVisibilityFraction = offset
-                invalidate()
-            }
-        })
-
+        this.viewPager!!.registerOnPageChangeCallback(pageChangeCallback)
         startTimer()
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        viewPager?.unregisterOnPageChangeCallback(pageChangeCallback)
+        viewPager = null
     }
 
     override fun draw(canvas: Canvas) {
