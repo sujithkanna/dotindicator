@@ -1,6 +1,6 @@
 # DotIndicator
 
-### Sample project to demonstrate one of the way to show page indicator for pages which switches on timeout.
+Sample project to demonstrate one of the way to show page indicator for pages which switches on timeout.
 
 [![Youtube](./youtube.png)](https://youtu.be/r4dlpZEJQ8g)
 ### Demo video
