@@ -20,10 +20,12 @@ class PageFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val page = arguments?.getInt(EXTRA_PAGE_INDEX) ?: 0
-        fragment_page_title.text = "Page ${page + 1}"
+        fragment_page_logo.setImageResource(IMAGES[page])
+        fragment_page_title.text = "Page $page"
     }
 
     companion object {
         const val EXTRA_PAGE_INDEX = "extra_page_index"
+        val IMAGES = listOf(R.drawable.logo_page1, R.drawable.logo_page2, R.drawable.logo_page3)
     }
 }
