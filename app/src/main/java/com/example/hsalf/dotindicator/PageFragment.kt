@@ -21,7 +21,7 @@ class PageFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val page = arguments?.getInt(EXTRA_PAGE_INDEX) ?: 0
         fragment_page_logo.setImageResource(IMAGES[page])
-        fragment_page_title.text = "Page $page"
+        fragment_page_title.text = "Page ${page.inc()}"
     }
 
     companion object {
