@@ -1,4 +1,4 @@
-# Welcome to my boring theory
+# Good UI
 
 A good UI is not hard to explain, but a single paragraph cannot describe it. A good UI is a combination of consistency, familiarity, expressive, clean and meaningful animations.
 
@@ -28,7 +28,7 @@ A good UI is not hard to explain, but a single paragraph cannot describe it. A g
 
 > Project source: [https://github.com/sujithkanna/dotindicator](https://github.com/sujithkanna/dotindicator)
 
-## What makes the app engaging?
+# What makes the app engaging?
 Now, this is a challenging topic with no straight answers.
 
 ## Data driven:
