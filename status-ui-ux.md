@@ -56,7 +56,7 @@ Now, this is a challenging topic with no straight answers.
 # Projects
 1. Blink Watch - In this, 80% of the UI components are developed and maintained by me. Most of the components are written using canvas to create complex animations and a smoother experience. Since the website is not available anymore, I am sharing the unboxing video. 
    
-    Blink watch unboxing - [Youtube](https://www.youtube.com/watch?v=69ioo_XSD_k)
+    Our CEO showing our watch - [Youtube](https://www.youtube.com/watch?v=uVR1MaqNTn4)
 
 2. SmileyRating - It might look like a simple library, but the fluid, smooth animations and responsiveness made it one of the best components. It got selected as the second best widget of the month by a [ourcodeworld blog](https://ourcodeworld.com/articles/read/943/top-10-best-android-rating-bar-widgets).
 
