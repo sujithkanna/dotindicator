@@ -58,7 +58,7 @@ Now, this is a challenging topic with no straight answers.
    
     Blink watch unboxing - [Youtube](https://www.youtube.com/watch?v=69ioo_XSD_k)
 
-2. SmileyRating - It might look like a simple library, but the fluid, smooth animations and responsiveness made it one of the best components. It got selected as the second best widget of the month by a [ourcodeworld](https://ourcodeworld.com/articles/read/943/top-10-best-android-rating-bar-widgets).
+2. SmileyRating - It might look like a simple library, but the fluid, smooth animations and responsiveness made it one of the best components. It got selected as the second best widget of the month by a [ourcodeworld blog](https://ourcodeworld.com/articles/read/943/top-10-best-android-rating-bar-widgets).
 
     Source code - [Github](https://github.com/sujithkanna/SmileyRating#demo)
 
