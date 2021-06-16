@@ -28,7 +28,7 @@ A good UI is not hard to explain, but a single paragraph cannot describe it. A g
 
 > Project source: [https://github.com/sujithkanna/dotindicator](https://github.com/sujithkanna/dotindicator)
 
-> I do not remember if I upload the updated cover, so just in case, I am listing down some of my UI work here too -> [projects 👇🏽](https://github.com/sujithkanna/dotindicator/blob/main/status-ui-ux.md#projects)
+> I do not remember if I upload the updated cover, so just in case, I am listing down some of my UI work here too at the end -> [projects 👇🏽](https://github.com/sujithkanna/dotindicator/blob/main/status-ui-ux.md#projects)
 
 # What makes the app engaging?
 Now, this is a challenging topic with no straight answers.
