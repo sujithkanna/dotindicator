@@ -58,7 +58,7 @@ Now, this is a challenging topic with no straight answers.
    
     Our CEO showing our watch - [Youtube](https://www.youtube.com/watch?v=uVR1MaqNTn4)
 
-    Why we chose this design - [Youtube](https://www.youtube.com/watch?v=4ohEOtarkbY)
+    Why this way - [Youtube](https://youtu.be/4ohEOtarkbY?t=190)
 
     Unboxing - [Youtube](https://www.youtube.com/watch?v=kPsyAj2Yhlg)
 
