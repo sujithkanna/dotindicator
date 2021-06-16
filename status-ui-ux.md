@@ -20,13 +20,15 @@ A good UI is not hard to explain, but a single paragraph cannot describe it. A g
 ## My View:
 > But a good UI is much more than those rules. Even with all those rules, things can trigger the OCD of the user. I had a similar experience with the Status app and tried to solve one of them by myself.  If you see the Status's first screen, the automated page switch is indicated by a page indicator. But the page indicator doesn't have continuity. When the page switches, the timer animation resets suddenly and changes to the next page. I tried my way to solve it. It is not the best solution, but better. 
 
-    I created a page indicator with a much familiar UI in this demo by including the timeout indicator. The transition is smoother even when the user takes control of swiping the page.
+    I have created a page indicator with a much familiar UI in this demo by including the timer indicator. The transition is smoother even when the user takes control of swiping the page.
 
 > Demo App: [apk](https://github.com/sujithkanna/dotindicator/blob/main/demo/Demo.apk?raw=true)
 
 > Demo Video: [youtube](https://youtu.be/ZAueAp0AMj0)
 
 > Project source: [https://github.com/sujithkanna/dotindicator](https://github.com/sujithkanna/dotindicator)
+
+> I do not remember if I upload the updated cover, so just in case, I am listing down some of my UI work here too -> [projects](https://github.com/sujithkanna/dotindicator)
 
 # What makes the app engaging?
 Now, this is a challenging topic with no straight answers.
@@ -49,3 +51,24 @@ Now, this is a challenging topic with no straight answers.
 
 ## Conclusion
 > Following these rules only gives a chance to survive. There are countless ways the app can be engaging. Most companies find different ways each day to engage users by analyzing the data, user behavior, trending topics and much more.
+
+
+# Projects
+1. Blink Watch - In this, 80% of the UI components are developed and maintained by me. Most of the components are written using canvas to create complex animations and a smoother experience. Since the website is not available anymore, I am sharing the unboxing video. 
+   
+    Blink watch unboxing - [Youtube](https://www.youtube.com/watch?v=69ioo_XSD_k)
+
+2. SmileyRating - It might look like a simple library, but the fluid, smooth animations and responsiveness made it one of the best components. It got selected as the second best widget of the month by a [ourcodeworld](https://ourcodeworld.com/articles/read/943/top-10-best-android-rating-bar-widgets).
+
+    Source code - [Github](https://github.com/sujithkanna/SmileyRating#demo)
+
+    How it works - [Medium](https://medium.com/mindorks/android-smileyrating-how-i-solved-it-9b5ee30f2c34)
+
+
+3. Myntra - Is an Indian fashion-based e-commerce company. I contributed to this app on an Instagram-like module to keep the users engaged.
+
+    Application - [PlayStore](https://play.google.com/store/apps/details?id=com.myntra.android&hl=en_IN&gl=US)
+
+4. My Profile - I am building my portfolio site using flutter web.
+
+    Site (Under construction) - [Portfolio](https://sujithkanna.github.io/#/)
