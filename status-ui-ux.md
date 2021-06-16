@@ -54,7 +54,7 @@ Now, this is a challenging topic with no straight answers.
 
 
 # Projects
-1. Blink Watch - In this, 80% of the UI components are developed and maintained by me. Most of the components are written using canvas to create complex animations and a smoother experience. Since the website is not available anymore, I am sharing the unboxing video. 
+1. Blink Watch - In this, 80% of the UI components are developed and maintained by me. Most of the components are written using canvas to create complex animations and a smoother experience. Since the website is not available anymore, I am sharing these video links to show our watch's unique design language and capabilities. 
    
     Our CEO showing our watch - [Youtube](https://www.youtube.com/watch?v=uVR1MaqNTn4)
 
